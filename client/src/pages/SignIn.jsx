@@ -37,7 +37,7 @@ export default function SignIn() {
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
-      dispatch(signInFailure);
+      dispatch(signInFailure(error));
     }
   };
   
@@ -51,7 +51,7 @@ export default function SignIn() {
           id='email' onChange={handleChange}
         />
         <input 
-          type="text" 
+          type="password" 
           placeholder='password' 
           className='border p-3 rounded-lg' 
           id='password' 

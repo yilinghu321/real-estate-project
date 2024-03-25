@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector} from 'react-redux';
-import { signInStart, signInFailure, signInSuccess } from "../redux/user/userSlice.js";
+import { updateUserFailure, updateUserStart, updateUserSuccess } from "../redux/user/userSlice.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { app } from '../firebase.js';
 
@@ -12,14 +12,15 @@ export default function Profile() {
   const [uploadPercentage, setUploadPercentage] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(null);
   const [formData, setFormData] = useState({});
-  const { loading, error } = useSelector((state) => state.user);
-  const { currentUser } = useSelector((state) => state.user);
+  const [userUploadSuccess, setUserUploadSuccess] = useState(false);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   console.log(file);
   console.log(uploadPercentage);
   console.log(formData);
   console.log(fileUploadError);
+
   useEffect(() => {
     if (file) {
       handleFileUpload(file);
@@ -57,9 +58,9 @@ export default function Profile() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(signInStart());
+    dispatch(updateUserStart());
     try {
-      const res = await fetch('/api/auth/signin', 
+      const res = await fetch(`/api/user/update/${currentUser._id}`, 
       {
         method: 'POST',
         headers:  {
@@ -69,13 +70,14 @@ export default function Profile() {
       })
       const data = await res.json();
       if (data.success === false) {
-        dispatch(signInFailure(data.message));
+        dispatch(updateUserFailure(data.message));
         return;
       } 
-      dispatch(signInSuccess(data));
-      navigate('/');
+      dispatch(updateUserSuccess(data));
+      setUserUploadSuccess(true);
+      navigate('/profile')
     } catch (error) {
-      dispatch(signInFailure);
+      dispatch(updateUserFailure(error.message));
     }
   };
 
@@ -84,47 +86,52 @@ export default function Profile() {
       <h1 className='text-3xl text-center font-semibold m-4 mt-6'>Profile</h1>
       <input onChange={(e) => setFile(e.target.files[0])} type="file" ref={fileRef} hidden accept="image/*"/>
       <img onClick={() => fileRef.current.click()} className="rounded-full mx-auto h-24 w-24 mt-6 cursor-pointer" src={formData.photo || currentUser.photo} alt="profile" />
-      <p className="self-center mt-3">
+      <p className="self-center mt-3 mx-auto">
         {fileUploadError? 
-          <span className="text-red-500"> Failed! Error Occurs.</span> : 
+          <span className="text-center text-red-500"> Failed! Error Occurs.</span> : 
           (uploadPercentage > 0 && uploadPercentage < 100)? 
             <span className="text-slate-500">{`Uploading ${uploadPercentage}%`}</span> :
               (uploadPercentage === 100)? 
-                <span className="text-green-500">Successfully uploaded!</span> : ""}
+                <span className="text-center text-green-500">Profile image successfully uploaded!</span> : ""}
       </p>
-      
-      <form onSubmit={handleSubmit} className='flex flex-col mt-6 gap-4'>
+      <form onSubmit={handleSubmit} className='flex flex-col mt-4 gap-4'>
         <input type="text" 
           placeholder='username' 
+          defaultValue={currentUser.username}
           className='border p-3 rounded-lg' 
           id='username' onChange={handleChange}
         />
         <input type="text" 
           placeholder='email' 
+          defaultValue={currentUser.email}
           className='border p-3 rounded-lg' 
           id='email' onChange={handleChange}
         />
         <input 
-          type="text" 
+          type="password" 
           placeholder='password' 
           className='border p-3 rounded-lg' 
           id='password' 
           onChange={handleChange}
         />
         <button disabled={loading} className='bg-slate-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70'> 
-          {loading? 'Loading...' : 'Update' } 
+          {loading? 'Uploading...' : 'Update' } 
         </button>
-        <Link to='/'>
-          <button className='bg-green-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70 max-w-lg mx-auto'>Create the listing</button>
-        </Link>
       </form>
+      <Link to='/'>
+        <button className='bg-green-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70 max-w-lg mx-auto mt-4'>Create the listing</button>
+      </Link>
       <div className='flex gap-3 justify-between mx-auto mt-4 text-red-500'>
         <span className="cursor-pointer">Delete account?</span>
         <Link to='/sign-in'>
           <span className="cursor-pointer">Sign out</span>
         </Link>
       </div>
-      {error && <p className="text-red-500 mx-auto w-1/2 md:w-96 mt-5">{ error }</p> }
+      <p className="self-center mt-3">
+        {error? 
+          <span className="text-red-500"> {error}</span> : 
+          userUploadSuccess? <span className="text-green-500">User is successfully updated!</span> : ''}
+      </p>
     </div>
   )
 }

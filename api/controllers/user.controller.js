@@ -12,14 +12,14 @@ export const updateUserInfo = async(req, res, next) => {
     if (req.body.username && (req.body.username !== req.user.username)) {
       const dupUsername = await User.find({username : req.body.username});
       if (dupUsername.length > 0) {
-        next(errorHandler(300, 'Username exists.'));
+        next(errorHandler(300, 'Failed! Username exists.'));
         return;
       }
     }
     if (req.body.email && req.body.email !== req.user.username) {
       const dupEmail = await User.find({email : req.body.email});
       if (dupEmail.length > 0) {
-        next(errorHandler(300, 'Email exists.'));
+        next(errorHandler(300, 'Failed! Email exists.'));
         return;
       }
     }
