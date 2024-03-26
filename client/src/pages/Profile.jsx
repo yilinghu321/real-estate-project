@@ -156,10 +156,9 @@ export default function Profile() {
         <button disabled={loading} className='bg-slate-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70'> 
           {loading? 'Uploading...' : 'Update' } 
         </button>
+        <Link className='bg-green-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70 text-center' to='/create-listing'>Create the listing
+        </Link>
       </form>
-      <Link to='/'>
-        <button className='bg-green-700 text-gray-100 p-3 rounded-md uppercase hover:opacity-90 disabled:opacity-70 max-w-lg mx-auto mt-4'>Create the listing</button>
-      </Link>
       <div className='flex gap-3 justify-between mx-auto mt-4 text-red-500'>
         <button onClick={() => setIsOpen(true)} data-modal-target="popup-modal" data-modal-toggle="popup-modal" className="cursor-pointer">Delete account?</button>
         {modalIsOpen && 
