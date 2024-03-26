@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector} from 'react-redux';
-import { updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess } from "../redux/user/userSlice.js";
+import { updateUserFailure, updateUserStart, updateUserSuccess, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserFailure, signOutUserStart, signOutUserSuccess } from "../redux/user/userSlice.js";
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { app } from '../firebase.js';
 
@@ -96,9 +96,25 @@ export default function Profile() {
         return;
       } 
       dispatch(deleteUserSuccess());
-      navigate('/signin')
+      navigate('/sign-in')
     } catch (error) {
       dispatch(deleteUserFailure(error.message));
+    }
+  }
+
+  const handleSignOut = async () => {
+    dispatch(signOutUserStart());
+    try {
+      const res = await fetch('/api/auth/signout');
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(signOutUserFailure(data.message));
+        return;
+      } 
+      dispatch(signOutUserSuccess(data));
+      navigate('/sign-in')
+    } catch (error) {
+      dispatch(signOutUserFailure(error.message));
     }
   }
 
@@ -168,9 +184,10 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-          </div>}
+          </div>
+        }
         <Link to='/sign-in'>
-          <span className="cursor-pointer">Sign out</span>
+          <span onClick={handleSignOut} className="cursor-pointer">Sign out</span>
         </Link>
       </div>
       <p className="self-center mt-6">
