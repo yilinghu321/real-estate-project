@@ -35,7 +35,18 @@ export const updateUserInfo = async(req, res, next) => {
     }, {new : true}); 
     const { password, ...rest } = updatedUser._doc;
     res.status(200).json(rest);
-  } catch (error) {
+  } catch (error) { 
     next(error);
   }
 } 
+
+export const deleteUser = async(req, res, next) => {
+  if (req.user.id !== req.params['id']) next(errorHandler(400, 'Not able to signout others\' account!'));
+  try {
+    await User.findByIdAndDelete(req.user.id);
+    res.clearCookie('access_token');
+    res.status(200).json({message : "User has been successfully deleted!"});
+  } catch (error) {
+    next(error);
+  }
+}
