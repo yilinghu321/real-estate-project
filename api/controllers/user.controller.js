@@ -41,7 +41,7 @@ export const updateUserInfo = async(req, res, next) => {
 } 
 
 export const deleteUser = async(req, res, next) => {
-  if (req.user.id !== req.params['id']) next(errorHandler(400, 'Not able to signout others\' account!'));
+  if (req.user.id !== req.params['id']) next(errorHandler(400, 'Not able to delete others\' account!'));
   try {
     await User.findByIdAndDelete(req.user.id);
     res.clearCookie('access_token');
