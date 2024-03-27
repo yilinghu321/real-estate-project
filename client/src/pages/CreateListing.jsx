@@ -115,7 +115,7 @@ export default function CreateListing() {
       setSubmitFormError(null);
       setSubmitFormSuccess(false);
 
-      const res = await fetch('/api/listing/create', 
+      const res = await fetch('/api/listings/create', 
       {
         method: 'POST',
         headers:  {

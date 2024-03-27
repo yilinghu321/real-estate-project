@@ -14,8 +14,9 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [userUploadSuccess, setUserUploadSuccess] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [showListingError, setshowListingError] = useState(null);
+  const [showListingError, setShowListingError] = useState(null);
   const [userListing, setUserListing] = useState([]);
+  const [deleteListingError, setDeleteListingError] = useState(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -122,17 +123,40 @@ export default function Profile() {
 
   const handleShowListings = async () => {
     try {
-      setshowListingError(null);
+      setShowListingError(null);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
       const data = await res.json();
       if (data.success === false) {
-        setshowListingError(data.message);
+        setShowListingError(data.message);
         return;
       } 
       setUserListing(data);
     } catch (error) {
-      setshowListingError(error);
+      setShowListingError(error);
     }
+  }
+
+  const handleListingDelete = async (listingId) => {
+    setDeleteListingError(null);
+    try {
+      const res = await fetch(`/api/listings/delete/${listingId}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success === false) {
+        setDeleteListingError(data.message);
+        console.log(deleteListingError)
+        return;
+      }
+      setUserListing((userListing) => userListing.filter((listing) => listing._id !== listingId))
+    } catch (error) {
+      setDeleteListingError(error)
+      console.log(deleteListingError)
+    }
+  }
+
+  const handleListingEdit = () => {
+    
   }
 
   return (
@@ -213,9 +237,10 @@ export default function Profile() {
       </p>
       <div>
         <button onClick={handleShowListings} className='text-green-700 w-full mb-6'>Show Listings</button>
+        {userListing.length > 0 && 
         <div className="flex flex-col gap-6">
           <h1 className="text-center font-semibold text-slate-700 text-xl mt-3">Your Listings</h1>
-          {userListing.length > 0 && userListing.map((listing) => (
+            {userListing.map((listing) => (
             <div key={listing._id} className="flex gap-5 justify-between items-center border rounded-lg p-3">
                 <Link to={`/listings/${listing._id}`}> 
                   <img src={listing.imageUrls[0]}  alt="listing cover" className="h-16 w-16 object-contain "/> 
@@ -224,15 +249,12 @@ export default function Profile() {
                   <p >{listing.name}</p>
                 </Link>
                 <div className="flex flex-col items-center">
-                  <button onClick={() => handleRemoveImage(index)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
-                  <button onClick={() => handleRemoveImage(index)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
+                  <button onClick={() => handleListingDelete(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
+                  <button onClick={handleListingEdit} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
                 </div>
             </div>
-          )
-        )}
-        </div>
-      
-        
+            ))}
+        </div> }
       </div>
     </div>
   )
