@@ -1,8 +1,85 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
+import { app } from "../firebase";
 
 export default function CreateListing() {
-  const [ isOffer, setIsOffer] = useState(false);
-  return (
+
+  const [isOffer, setIsOffer] = useState(false);
+  const [files, setFiles] = useState([]);
+  const [imageUploadError, setImageUploadError] = useState(null);
+  const [formData, setFormData] = useState({imageUrls: []});
+  const [uploading, setUploading] = useState(false);
+  //console.log(formData)
+
+  //console.log(files)
+  //console.log(files.length)
+
+  const handleOnChange = (e) => {
+    setImageUploadError(null);
+    if (e.target.files.length > 6) {
+      const value = Object.values(e.target.files).slice(0, 6);
+      setFiles(value);
+      setImageUploadError("Can select only upto 6 images, the rest images won't be sent.");
+    } else setFiles(e.target.files);
+    console.log(e.target.files)
+  };
+
+  const handleImageSubmit = (e) => {
+    setUploading(false);
+    
+    if (files.length === 0) {
+      console.log(files.length)
+      setImageUploadError('No image has been selected!');
+      return;
+    }
+    if (files.length + formData.imageUrls.length > 6) {
+      setImageUploadError('Exceed maximum of 6 images (2 MB Each)!');
+      return;
+    }
+    setImageUploadError(null);
+    setUploading(true);
+
+    const promises = [];
+    for (let i = 0; i < files.length; i++) {
+      promises.push(storeImage(files[i]));
+    }
+    Promise.all(promises).then((urls) => {
+      setFormData({...formData, imageUrls: formData.imageUrls.concat(urls)});
+      setImageUploadError(null);
+      setUploading(false);
+    }).catch((err) => {
+      setImageUploadError('Image upload failed (2 MB Max Each)!');
+      setUploading(false);
+    });
+  }
+
+  const storeImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const storage = getStorage(app);
+      const fileName = new Date().getTime + file.name;
+      const storageRef = ref(storage, fileName);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+  
+      uploadTask.on('state_changed',  
+        (snapshot) => {},
+        (error) => {
+          reject(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then(
+            (downloadURL) => { resolve(downloadURL);
+          });
+      })
+    })
+  }
+
+  const handleRemoveImage = (index) => { 
+     setFormData({
+      ...formData,
+      imageUrls: formData.imageUrls.filter((_, i) => i !== index)
+     })
+  }
+  return ( 
     <main className='p-3 max-w-4xl mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Create Listing</h1>
       <form className='flex flex-col sm:flex-row gap-6'>
@@ -64,12 +141,22 @@ export default function CreateListing() {
             <span className="text-gray-700 font-normal ml-2"> The first image will be the cover(Max 6/ 2 MB Each)</span>
           </p>
           <div className="flex gap-3"> 
-            <input className='border border-gray-500 rounded-lg p-3 w-full'type="file" id='images' accept="image/*" multiple/>
-            <button className="border border-green-700 text-green-700 uppercase rounded-lg p-3 hover:shadow-md disabled:opacity-70">Upload</button>
+            <input onChange={handleOnChange} className='border border-gray-500 rounded-lg p-3 w-full'type="file" id='images' accept="image/*" multiple/>
+            <button disabled={uploading} type='button' onClick={(e) => handleImageSubmit(e)} className="border border-green-700 text-green-700 uppercase rounded-lg p-3 hover:shadow-md disabled:opacity-70">{uploading? 'Uploading' : 'Upload'}</button>
           </div>
+          {
+            formData.imageUrls.length > 0 && formData.imageUrls.map((url, index) => (
+              <div key={url} className="flex gap-4 justify-between items-center border p-3 rounded-lg">
+                <img src={url} alt="listing image" className="w-20 h-20 object-contain rounded-lg hover:opacity-80  cursor-pointer"/>
+                <button onClick={() => handleRemoveImage(index)} type='button' className="hover:opacity-60 rounded-lg p-2 text-red-700 uppercase">Delete</button>
+              </div>
+              
+            ))
+          }
           <button className="bg-slate-700 uppercase rounded-lg p-3 text-white hover:opacity-90 disabled:opacity-70">Create Listing</button>
-        </div>
-      </form>
+          {imageUploadError && <p className="text-red-500">{imageUploadError}</p> }
+        </div> 
+      </form> 
     </main>
   )
 }
