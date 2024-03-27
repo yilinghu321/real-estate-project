@@ -17,6 +17,7 @@ export default function Profile() {
   const [showListingError, setShowListingError] = useState(null);
   const [userListing, setUserListing] = useState([]);
   const [deleteListingError, setDeleteListingError] = useState(null);
+  const [editListingError, setEditListingError] = useState(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -155,8 +156,21 @@ export default function Profile() {
     }
   }
 
-  const handleListingEdit = () => {
-    
+  const handleListingEdit = async (listingId) => {
+    setEditListingError(null);
+    try {
+      const res = await fetch(`/api/listings/edit/${listingId}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setEditListingError(data.message);
+        console.log(editListingError)
+        return;
+      }
+      setUserListing((userListing) => userListing.filter((listing) => listing._id !== listingId))
+    } catch (error) {
+      setEditListingError(error)
+      console.log(editListingError)
+    }
   }
 
   return (
@@ -250,7 +264,7 @@ export default function Profile() {
                 </Link>
                 <div className="flex flex-col items-center">
                   <button onClick={() => handleListingDelete(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
-                  <button onClick={handleListingEdit} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
+                  <button onClick={() => handleListingEdit(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
                 </div>
             </div>
             ))}

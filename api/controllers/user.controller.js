@@ -13,15 +13,13 @@ export const updateUserInfo = async(req, res, next) => {
     if (req.body.username && (req.body.username !== req.user.username)) {
       const dupUsername = await User.find({username : req.body.username});
       if (dupUsername.length > 0) {
-        next(errorHandler(300, 'Failed! Username exists.'));
-        return;
+        return next(errorHandler(300, 'Failed! Username exists.'));
       }
     }
     if (req.body.email && req.body.email !== req.user.username) {
       const dupEmail = await User.find({email : req.body.email});
       if (dupEmail.length > 0) {
-        next(errorHandler(300, 'Failed! Email exists.'));
-        return;
+        return next(errorHandler(300, 'Failed! Email exists.'));
       }
     }
     if (req.body.password) req.body.password = bcryptjs.hashSync(req.body.password, 10);
@@ -42,7 +40,9 @@ export const updateUserInfo = async(req, res, next) => {
 } 
 
 export const deleteUser = async(req, res, next) => {
-  if (req.user.id !== req.params['id']) next(errorHandler(400, 'Not able to delete others\' account!'));
+  if (req.user.id !== req.params['id']) {
+    return next(errorHandler(400, 'Not able to delete others\' account!'));
+  }
   try {
     await User.findByIdAndDelete(req.user.id);
     res.clearCookie('access_token');
@@ -53,7 +53,9 @@ export const deleteUser = async(req, res, next) => {
 }
 
 export const getUserListing = async(req, res, next) => {
-  if (req.user.id !== req.params['id']) next(errorHandler(400, 'You can only view your own listings.'));
+  if (req.user.id !== req.params['id']) {
+    return next(errorHandler(400, 'You can only view your own listings.'));
+  }
   try {
     const listings = await Listing.find({userRef : req.user.id});
     res.status(200).json(listings);
