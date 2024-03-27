@@ -29,7 +29,7 @@ export default function Profile() {
     }
   }, [file]);
 
-  const handleFileUpload = async (file) => {
+  const handleFileUpload = (file) => {
     setFileUploadError(null);
     const storage = getStorage(app);
     const fileName = new Date().getTime + file.name;
