@@ -14,6 +14,8 @@ export default function Profile() {
   const [formData, setFormData] = useState({});
   const [userUploadSuccess, setUserUploadSuccess] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [showListingError, setshowListingError] = useState(null);
+  const [userListing, setUserListing] = useState([]);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -118,6 +120,21 @@ export default function Profile() {
     }
   }
 
+  const handleShowListings = async () => {
+    try {
+      setshowListingError(null);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setshowListingError(data.message);
+        return;
+      } 
+      setUserListing(data);
+    } catch (error) {
+      setshowListingError(error);
+    }
+  }
+
   return (
     
     <div className='p-3 max-w-lg mx-auto'>
@@ -194,6 +211,29 @@ export default function Profile() {
           <span className="text-red-500"> {error}</span> : 
           userUploadSuccess? <span className="text-green-500">User is successfully updated!</span> : ''}
       </p>
+      <div>
+        <button onClick={handleShowListings} className='text-green-700 w-full mb-6'>Show Listings</button>
+        <div className="flex flex-col gap-6">
+          <h1 className="text-center font-semibold text-slate-700 text-xl mt-3">Your Listings</h1>
+          {userListing.length > 0 && userListing.map((listing) => (
+            <div key={listing._id} className="flex gap-5 justify-between items-center border rounded-lg p-3">
+                <Link to={`/listings/${listing._id}`}> 
+                  <img src={listing.imageUrls[0]}  alt="listing cover" className="h-16 w-16 object-contain "/> 
+                </Link>
+                <Link className="text-slate-700 font-semibold flex-1 hover:underline truncate" to={`/listings/${listing._id}`}> 
+                  <p >{listing.name}</p>
+                </Link>
+                <div className="flex flex-col items-center">
+                  <button onClick={() => handleRemoveImage(index)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
+                  <button onClick={() => handleRemoveImage(index)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
+                </div>
+            </div>
+          )
+        )}
+        </div>
+      
+        
+      </div>
     </div>
   )
 }
