@@ -4,7 +4,7 @@ import { app } from "../firebase";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-export default function CreateListing() {
+export default function EditListing() {
 
   const navigate = useNavigate();
   const {currentUser} = useSelector(state => state.user);
@@ -32,6 +32,7 @@ export default function CreateListing() {
   const [submitFormLoading, setSubmitFormLoading] = useState(false);
 
   console.log(formData)
+
   const handleOnChange = (e) => {
     setImageUploadError(null);
     if (e.target.files.length > 6) {
@@ -99,18 +100,10 @@ export default function CreateListing() {
   }
 
   const handleFormChange = (e) => {
-    if (e.target.id === 'rent' || e.target.id === 'sale') {
-      setFormData({...formData, type : e.target.id});
-    }
-    if (e.target.id === 'name' || e.target.id === 'description' || e.target.id === 'address') {
-      setFormData({...formData, [e.target.id] : e.target.value});
-    }
-    if (e.target.id === 'furnished' || e.target.id === 'offer' || e.target.id === 'pet') {
-      setFormData({...formData, [e.target.id] : e.target.checked});
-    }
-    if (e.target.id === 'bathroom' || e.target.id === 'bedroom' || e.target.id === 'parking' || e.target.id === 'regularprice' || e.target.id === 'discountprice') { 
-      setFormData({...formData, [e.target.id] : e.target.value});
-    }
+    if (e.target.id === 'rent' || e.target.id === 'sale') setFormData({...formData, type : e.target.id});
+    if (e.target.id === 'name' || e.target.id === 'description' || e.target.id === 'address') setFormData({...formData, [e.target.id] : e.target.value});
+    if (e.target.id === 'furnished' || e.target.id === 'offer' || e.target.id === 'pet') setFormData({...formData, [e.target.id] : e.target.checked});
+    if (e.target.id === 'bathroom' || e.target.id === 'bedroom' || e.target.id === 'parking' || e.target.id === 'regularprice' || e.target.id === 'discountprice') setFormData({...formData, [e.target.id] : e.target.value});
   }
 
   const handleCreateList = async (e) => {
@@ -123,7 +116,7 @@ export default function CreateListing() {
       setSubmitFormError(null);
       setSubmitFormSuccess(false);
 
-      const res = await fetch('/api/listings/create', 
+      const res = await fetch(`/api/listings/edit`, 
       {
         method: 'POST',
         headers:  {
