@@ -264,8 +264,10 @@ export default function Profile() {
                 </Link>
                 <div className="flex flex-col items-center">
                   <button onClick={() => handleListingDelete(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
-                  <button onClick={() => handleListingEdit(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
-                </div>
+                  <Link to={`/update-listing/${listing._id}`}>
+                    <button onClick={() => handleListingEdit(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
+                  </Link>
+                  </div>
             </div>
             ))}
         </div> }

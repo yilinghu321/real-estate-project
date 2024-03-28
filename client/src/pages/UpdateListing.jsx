@@ -1,12 +1,13 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { app } from "../firebase";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function EditListing() {
+export default function UpdateListing() {
 
   const navigate = useNavigate();
+  const params = useParams();
   const {currentUser} = useSelector(state => state.user);
   const [files, setFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState(null);
@@ -33,6 +34,20 @@ export default function EditListing() {
 
   console.log(formData)
 
+  useEffect(() => {
+    const fetchListing = async () => {
+      const listingId = params.id;
+      const res = await fetch(`/api/listings/get/${listingId}`);
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      } 
+      setFormData(data);
+      console.log(listingId);
+    }
+    fetchListing();
+  },[])
   const handleOnChange = (e) => {
     setImageUploadError(null);
     if (e.target.files.length > 6) {
@@ -106,7 +121,7 @@ export default function EditListing() {
     if (e.target.id === 'bathroom' || e.target.id === 'bedroom' || e.target.id === 'parking' || e.target.id === 'regularprice' || e.target.id === 'discountprice') setFormData({...formData, [e.target.id] : e.target.value});
   }
 
-  const handleCreateList = async (e) => {
+  const handleUpdateList = async (e) => {
     e.preventDefault();
     try {
       if (formData.imageUrls.length < 1) return setSubmitFormError('You must upload at least 1 image.');
@@ -116,17 +131,17 @@ export default function EditListing() {
       setSubmitFormError(null);
       setSubmitFormSuccess(false);
 
-      const res = await fetch(`/api/listings/edit`, 
+      const listingId = params.id;
+      const res = await fetch(`/api/listings/update/${listingId}`, 
       {
         method: 'POST',
         headers:  {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...formData,
-          userRef: currentUser._id})
+        body: JSON.stringify(formData)
       })
       const data = await res.json();
+      console.log(data)
       if (data.success === false) {
         setSubmitFormError(data.message);
         setSubmitFormSuccess(false);
@@ -134,17 +149,18 @@ export default function EditListing() {
       } 
       setSubmitFormSuccess(true);
       setSubmitFormLoading(false);
-      navigate(`/listing/${data._id}`);
+      //navigate(`/listing/${data._id}`);
     } catch (error) {
       setSubmitFormError(error.message);
       setSubmitFormSuccess(false);
+      setSubmitFormLoading(false);
     }
   }
 
   return ( 
     <main className='p-3 max-w-4xl mx-auto'>
-      <h1 className='text-3xl font-semibold text-center my-7'>Create Listing</h1>
-      <form onSubmit={handleCreateList} className='flex flex-col sm:flex-row gap-6'>
+      <h1 className='text-3xl font-semibold text-center my-7'>Update Listing</h1>
+      <form onSubmit={handleUpdateList} className='flex flex-col sm:flex-row gap-6'>
         <div className='flex flex-col gap-4 flex-1'>
           <input type="text" placeholder='Name' className='border border-gray-300 p-3 rounded-lg' id='name' maxLength='62' minLength='10' onChange={handleFormChange} value={formData.name} required/>
           <textarea type="text" placeholder='Description' className='border border-gray-300 p-3 rounded-lg' id='description' onChange={handleFormChange} value={formData.description} required/>
@@ -215,7 +231,7 @@ export default function EditListing() {
               
             ))
           }
-          <button disabled={submitFormLoading || uploading} onClick={handleCreateList} className="bg-slate-700 uppercase rounded-lg p-3 text-white hover:opacity-90 disabled:opacity-70">{ submitFormLoading? 'creating' : 'Create Listing'}</button>
+          <button disabled={submitFormLoading || uploading} onClick={handleUpdateList} className="bg-slate-700 uppercase rounded-lg p-3 text-white hover:opacity-90 disabled:opacity-70">{ submitFormLoading? 'updating' : 'update Listing'}</button>
           {imageUploadError && <p className="text-red-500">{imageUploadError}</p>} 
           {submitFormError && <p className="text-red-500">{submitFormError}</p>}
         </div> 
