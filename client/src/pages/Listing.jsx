@@ -4,6 +4,19 @@ import { Swiper, SwiperSlide} from 'swiper/react';
 import SwiperCore from 'swiper';
 import { Navigation } from 'swiper/modules';
 import 'swiper/css/bundle';
+import {
+  FaBath,
+  FaChair,
+  FaMapMarkedAlt,
+  FaMapMarkerAlt,
+  FaParking,
+  FaShare,
+  FaDog
+} from 'react-icons/fa';
+import { BsFillSignNoParkingFill } from "react-icons/bs";
+import { IoBed } from "react-icons/io5";
+
+//import Contact from '../components/Contact';
 
 export default function Listing() {
 
@@ -12,6 +25,7 @@ export default function Listing() {
   const [listingData, setListingData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const params = useParams();
 
   useEffect(() => {
@@ -47,16 +61,90 @@ export default function Listing() {
           <p className="text-center text-2xl font-semibold text-slate-500"> There is something went wrong...</p>
         </div>}
       {!loading && !error && listingData && (
-      <div>
-        <Swiper navigation>
-          {listingData.imageUrls.map((url) =>  (
-            <SwiperSlide key={url}>
-              <div className="h-[500px]" style={{background: `url("${url}"
-) no-repeat center`, backgroundSize: 'cover'}}></div>
-            </SwiperSlide>
-          ))}
-      </Swiper>
-      </div>
+        <div>
+          <Swiper navigation>
+            {listingData.imageUrls.map((url) =>  (
+              <SwiperSlide key={url}>
+                <div className="h-[240px] sm:h-[500px]" style={{background: `url("${url}") no-repeat center`, backgroundSize: 'cover'}}></div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+          <div className='fixed top-[9%] right-[3%] z-10 border rounded-full w-12 h-12 flex justify-center items-center bg-slate-100 cursor-pointer'>
+            <FaShare
+              className='text-slate-500'
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setCopied(true);
+                setTimeout(() => {
+                  setCopied(false);
+                }, 2000);
+              }}
+            />
+          </div>
+          {copied && (
+            <p className='fixed top-[15%] z-10 right-[3%] mx-auto bg-slate-50 rounded-md text-slate-900 text-sm p-2'>
+              Link copied!
+            </p>
+          )}
+          <div className="flex flex-col gap-3 mx-auto max-w-4xl p-3"> 
+            <p className="text-2xl font-semibold text-slate-700">{listingData.name} - ${' '} 
+              {listingData.offer
+                ? listingData.discountprice.toLocaleString('en-US') 
+                : listingData.regularprice.toLocaleString('en-US')          
+              }
+              {listingData.type === 'rent' && ' / Month'}
+            </p>
+            <p className='flex items-center gap-2 text-slate-600  text-sm'>
+              <FaMapMarkerAlt className='text-green-700' />
+              {listingData.address}
+            </p>
+            <div className='flex gap-4'>
+              <p className='bg-red-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
+                {listingData.type === 'rent' ? 'For Rent' : 'For Sale'}
+              </p>
+              {listingData.offer && (
+                <p className='bg-green-900 w-full max-w-[200px] text-white text-center p-1 rounded-md'>
+                  ${+listingData.regularprice - +listingData.discountprice} OFF
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-3 mt-3">
+              <span className="font-semibold text-black underline">Description</span>
+              <p className="text-slate-700">{listingData.description}</p>
+            </div>
+            <ul className="text-sm font-semibold text-green-900 flex gap-4 sm:gap-6 flex-wrap">
+                <li className="items-center flex gap-1 whitespace-nowrap">
+                  <IoBed className="text-2xl"/>
+                  {listingData.bedroom > 1? `${listingData.bedroom} Beds` : `${listingData.bedroom} Bed`}
+                </li>
+                <li className="items-center flex gap-1 whitespace-nowrap">
+                  <FaBath className="text-xl"/>
+                  {listingData.bathroom > 1? `${listingData.bathroom} Baths` : `${listingData.bathroom} Bath`}
+                </li>
+                {listingData.parking < 1
+                  ? <li className="items-center flex gap-1 whitespace-nowrap"> 
+                  <FaParking className="text-xl"/>{listingData.parking} Parking 
+                  </li>
+                  : <li className="items-center flex gap-1 whitespace-nowrap text-red-900"> 
+                  <BsFillSignNoParkingFill className="text-xl"/>NO Parking
+                  </li>}
+                {listingData.furnished
+                  ? <li className="items-center flex gap-1 whitespace-nowrap">
+                  <FaChair className="text-xl"/>Furnished
+                  </li>
+                  : <li className="items-center flex gap-1 whitespace-nowrap text-red-900"> 
+                  <FaChair className="text-xl"/>Not Furnished
+                  </li>}
+                {listingData.pet
+                ? <li className="items-center flex gap-1 whitespace-nowrap">
+                <FaDog className="text-2xl"/>Pets Friendly
+                </li>
+                : <li className="items-center flex gap-1 whitespace-nowrap text-red-900"> 
+                <FaDog className="text-2xl"/>No Pets
+                </li>}
+            </ul> 
+          </div>
+        </div>
       )}
     </main> 
   )
