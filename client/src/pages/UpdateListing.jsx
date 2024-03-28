@@ -44,10 +44,10 @@ export default function UpdateListing() {
         return;
       } 
       setFormData(data);
-      console.log(listingId);
     }
     fetchListing();
   },[])
+
   const handleOnChange = (e) => {
     setImageUploadError(null);
     if (e.target.files.length > 6) {
@@ -149,7 +149,7 @@ export default function UpdateListing() {
       } 
       setSubmitFormSuccess(true);
       setSubmitFormLoading(false);
-      //navigate(`/listing/${data._id}`);
+      navigate(`/listings/${data._id}`);
     } catch (error) {
       setSubmitFormError(error.message);
       setSubmitFormSuccess(false);
