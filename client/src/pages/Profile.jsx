@@ -156,23 +156,6 @@ export default function Profile() {
     }
   }
 
-  const handleListingEdit = async (listingId) => {
-    setEditListingError(null);
-    try {
-      const res = await fetch(`/api/listings/edit/${listingId}`);
-      const data = await res.json();
-      if (data.success === false) {
-        setEditListingError(data.message);
-        console.log(editListingError)
-        return;
-      }
-      setUserListing((userListing) => userListing.filter((listing) => listing._id !== listingId))
-    } catch (error) {
-      setEditListingError(error)
-      console.log(editListingError)
-    }
-  }
-
   return (
     
     <div className='p-3 max-w-lg mx-auto'>
@@ -265,7 +248,7 @@ export default function Profile() {
                 <div className="flex flex-col items-center">
                   <button onClick={() => handleListingDelete(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-red-700 uppercase text-sm">Delete</button>
                   <Link to={`/update-listing/${listing._id}`}>
-                    <button onClick={() => handleListingEdit(listing._id)} type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
+                    <button type='button' className="hover:opacity-60 rounded-lg text-green-700 uppercase text-sm">Edit</button>
                   </Link>
                   </div>
             </div>
