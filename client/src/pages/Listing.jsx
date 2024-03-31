@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Swiper, SwiperSlide} from 'swiper/react';
 import SwiperCore from 'swiper';
 import { Navigation } from 'swiper/modules';
@@ -16,7 +17,7 @@ import {
 import { BsFillSignNoParkingFill } from "react-icons/bs";
 import { IoBed } from "react-icons/io5";
 
-//import Contact from '../components/Contact';
+import Contact from '../components/Contact';
 
 export default function Listing() {
 
@@ -26,6 +27,8 @@ export default function Listing() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [contact, setContact] = useState(false);
+  const { currentUser } = useSelector(state => state.user);
   const params = useParams();
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function Listing() {
           <Swiper navigation>
             {listingData.imageUrls.map((url) =>  (
               <SwiperSlide key={url}>
-                <div className="h-[240px] sm:h-[500px]" style={{background: `url("${url}") no-repeat center`, backgroundSize: 'cover'}}></div>
+                <div className="h-[240px] sm:h-[420px]" style={{background: `url("${url}") no-repeat center`, backgroundSize: 'cover'}}></div>
               </SwiperSlide>
             ))}
             <div className="absolute top-[9%] right-[3%] h-10 w-100 z-10 justify-stretch flex gap-2 items-center">
@@ -89,7 +92,7 @@ export default function Listing() {
             </div> 
           </Swiper>
           
-          <div className="flex flex-col gap-3 mx-auto max-w-4xl p-3"> 
+          <div className="flex flex-col gap-4 mx-auto max-w-4xl p-3"> 
             <p className="text-2xl font-semibold text-slate-700">{listingData.name} - ${' '} 
               {listingData.offer
                 ? listingData.discountprice.toLocaleString('en-US') 
@@ -146,6 +149,10 @@ export default function Listing() {
                 <FaDog className="text-2xl"/>No Pets
                 </li>}
             </ul> 
+            {currentUser && currentUser._id !== listingData.userRef && !contact && (
+            <button onClick={() => setContact(true)} className="bg-slate-700 rounded-lg p-3 uppercase hover:opacity-85 text-white">Contact Landlord</button>
+            )}
+            {contact && <Contact listing={listingData}/>}
           </div>
         </div>
       )}
