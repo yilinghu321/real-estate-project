@@ -63,3 +63,16 @@ export const getUserListing = async(req, res, next) => {
     next(error);
   }
 }
+
+export const getLandlordUser = async (req, res, next) => {
+  try {
+    const listingUser = await User.findById(req.params.id);
+    if (!listingUser) {
+      return next(errorHandler(404, "The landlord no longer exists."));
+    }
+    const { password:p, ...rest } = listingUser._doc;
+    res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+}
