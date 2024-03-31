@@ -89,21 +89,15 @@ export const getListings = async (req, res, next) => {
       type = { $in: ['rent', 'sale']};
     }
 
-    let parking = req.query.parking;
-    if (parking === undefined || parking === 0) {
-      parking = { $gte: 0};
-    } else parking = { $gt: parking};
+    let parking = parseInt(req.query.parking) || 0;
+    parking = { $gte: parking};
     
-    let bedroom = req.query.bedroom;
-    if (bedroom === undefined || bedroom === 0) {
-      bedroom = { $gte: 0};
-    } else bedroom = { $gt: bedroom};
+    let bedroom = parseInt(req.query.bedroom) || 0;
+    bedroom = { $gte: bedroom};
     
 
-    let bathroom = req.query.bathroom;
-    if (bathroom === undefined || bathroom === 0) {
-      bathroom = { $gte: 0};
-    } else bathroom = { $gte: bathroom};
+    let bathroom = parseInt(req.query.bathroom) || 0;
+    bathroom = { $gte: bathroom};
 
     const searchTerm = req.query.searchTerm || '';
 
