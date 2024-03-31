@@ -129,7 +129,4 @@ export const getListings = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-
-  
-  
 }
