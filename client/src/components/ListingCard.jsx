@@ -22,7 +22,7 @@ export default function ListingCard({listing}) {
               <FaMapMarkerAlt className='text-green-700 ' />
               {listing.address}
           </p>
-          <p className="text-slate-700 text-xs line-clamp-2">{listing.description}</p>
+          <p className="text-slate-700 text-xs line-clamp-2 min-h-[42px]">{listing.description}</p>
           <p className="text-sm font-semibold text-slate-900 mt-1 mb-2"> $
             {listing.offer
               ? listing.discountprice.toLocaleString('en-US') 
