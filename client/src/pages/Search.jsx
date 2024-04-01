@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ListingCard from "../components/ListingCard.jsx";
 
 export default function Search() {
   const [loading, setLoading] = useState(false);
@@ -15,13 +16,13 @@ export default function Search() {
     bedroom: 0,
     bathroom: 0,
     offer: false,
-    sort: 'createAt',
-    order: 'desc',
+    sort: 'updatedAt',
+    order: -1,
   });
 
   const navigate = useNavigate();
-  console.log(listings)
-  console.log(sidebarData)
+  console.log(listings.length)
+  // console.log(sidebarData)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -47,8 +48,8 @@ export default function Search() {
       bedroom: bedroomFromUrl? parseInt(bedroomFromUrl) : 0,
       bathroom: bathroomFromUrl? parseInt(bathroomFromUrl) : 0,
       offer: offerFromUrl === 'true'? true : false,
-      sort: sortFromUrl || 'createAt',
-      order: orderFromUrl || 'desc',
+      sort: sortFromUrl || 'updatedAt',
+      order: orderFromUrl? parseInt(orderFromUrl) : -1,
     });
 
     const fetchListings = async () => {
@@ -56,7 +57,7 @@ export default function Search() {
         setLoading(true);
         const searchQuery = urlParams.toString();
         const res = await fetch(`/api/listings/search?${searchQuery}`)
-        const data = res.json();
+        const data = await res.json();
         if (data.success === false) {
           setError(data.message);
           setLoading(false);
@@ -68,7 +69,6 @@ export default function Search() {
         setLoading(false);
       }
     };
-
     fetchListings();
   },[location.search])
 
@@ -90,12 +90,13 @@ export default function Search() {
   }
   
   const handleFormChange = (e) => {
+    if (e.target.id === "searchTerm") setSidebarData({...sidebarData, searchTerm: e.target.value})
     if (e.target.id === 'rent' || e.target.id === 'sale' || e.target.id === 'all') setSidebarData({...sidebarData, type : e.target.id});
     if (e.target.id === 'furnished' || e.target.id === 'offer' || e.target.id === 'pet') setSidebarData({...sidebarData, [e.target.id] : e.target.checked || e.target.checked === 'true'? true : false});
     if (e.target.id === 'bathroom' || e.target.id === 'bedroom' || e.target.id === 'parking' || e.target.id === 'regularprice' || e.target.id === 'discountprice') setSidebarData({...sidebarData, [e.target.id] : e.target.value});
     if (e.target.id === "sort_order") {
-      const sort = e.target.value.split('_')[0] || 'createAt';
-      const order = e.target.value.split('_')[1] || 'desc';
+      const sort = e.target.value.split('_')[0] || 'updatedAt';
+      const order = e.target.value.split('_')[1] === 'desc'? -1 : 1;
       setSidebarData({...sidebarData, sort, order});
     }
   }
@@ -106,7 +107,7 @@ export default function Search() {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-sm">
           <div className="flex gap-1 items-center">
             <label className="font-semibold">Search:</label>
-            <input onChange={handleFormChange} value={sidebarData.searchTerm} type="text" placeholder='Search...' className='border w-full bg-white rounded-lg p-2'/>
+            <input onChange={handleFormChange} value={sidebarData.searchTerm} type="text" placeholder='Search...' id='searchTerm' className='border w-full bg-white rounded-lg p-2'/>
           </div>
           <div className="flex flex-wrap gap-2 items-center">
             <label className="font-semibold">Type:</label>
@@ -155,18 +156,28 @@ export default function Search() {
           </div>
           <div className="flex gap-2 items-center">
             <label className="font-semibold">Sort:</label>
-            <select onChange={handleFormChange} defaultValue='createAt_desc' className="border rounded-lg p-2" id="sort_order">
+            <select onChange={handleFormChange} defaultValue='updatedAt_desc' className="border rounded-lg p-2" id="sort_order">
               <option value="regularprice_desc">Price high to low</option>
-              <option value="regularprice_desc">Price low to high</option>
-              <option value="createAt_desc">Latest</option>
-              <option value="createAt_asc">Oldest</option>
+              <option value="regularprice_asc">Price low to high</option>
+              <option value="updatedAt_desc">Latest</option>
+              <option value="updatedAt_asc">Oldest</option>
             </select>
           </div>
           <button className="w-full bg-slate-700 text-white p-3 rounded-lg hover:opacity-85">Search</button>
         </form>
       </div>
-      <div id='dislayside'>
-        <h1 className="text-xl md:text-2xl font-semibold border-b p-3 text-slate-700 mt-3">Listing Results:</h1>
+      <div id='dislayside' className="p-6 flex-1">
+        <h1 className="text-xl md:text-2xl font-semibold min-w-screen p-1 border-b text-slate-700">Listing Results:</h1>
+        <div className="p-6 text-lg md:text-xl font-semibold text-slate-500">
+          {loading && <label>Loading...</label>}
+          {!loading && listings.length === 0 &&
+          <label>No Listing Matches.</label>}
+        </div>
+        <div className='flex flex-col gap-8'>
+          {!loading && listings.length !== 0 && listings.map((listing) =>
+            <ListingCard key={listing._id} listing={listing}/>)
+          }
+        </div>
       </div>
     </div>
   )
