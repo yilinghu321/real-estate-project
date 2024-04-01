@@ -123,7 +123,7 @@ export default function Listing() {
                   <FaBath className="text-xl"/>
                   {listingData.bathroom > 1? `${listingData.bathroom} Baths` : `${listingData.bathroom} Bath`}
                 </li>
-                {listingData.parking < 1
+                {listingData.parking > 0 
                   ? <li className="items-center flex gap-1 whitespace-nowrap"> 
                   <FaParking className="text-xl"/>{listingData.parking} Parking 
                   </li>

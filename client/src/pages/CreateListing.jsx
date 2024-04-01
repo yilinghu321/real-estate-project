@@ -141,7 +141,7 @@ export default function CreateListing() {
       } 
       setSubmitFormSuccess(true);
       setSubmitFormLoading(false);
-      navigate(`/listing/${data._id}`);
+      navigate(`/listings/${data._id}`);
     } catch (error) {
       setSubmitFormError(error.message);
       setSubmitFormSuccess(false);

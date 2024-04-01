@@ -23,7 +23,7 @@ export default function ListingCard({listing}) {
               {listing.address}
           </p>
           <p className="text-slate-700 text-xs line-clamp-2">{listing.description}</p>
-          <p className="text-sm font-semibold text-slate-500 mt-1 mb-2"> $
+          <p className="text-sm font-semibold text-slate-900 mt-1 mb-2"> $
             {listing.offer
               ? listing.discountprice.toLocaleString('en-US') 
               : listing.regularprice.toLocaleString('en-US')          

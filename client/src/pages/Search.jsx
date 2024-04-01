@@ -6,7 +6,7 @@ export default function Search() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [listings, setListings] = useState([]);
-
+  const [showMore, setShowMore] = useState(false);
   const [sidebarData, setSidebarData] = useState({
     searchTerm: '',
     type: 'all',
@@ -36,9 +36,9 @@ export default function Search() {
     const parkingFromUrl = urlParams.get('parking');
     const sortFromUrl = urlParams.get('sort');
     const orderFromUrl = urlParams.get('order');
-    // if (searchTermFromUrl || typeFromUrl || offerFromUrl || furnishedFromUrl
-    //   || petFromUrl || bedroomFromUrl || bathroomFromUrl || parkingFromUrl
-    //   || sortFromUrl || orderFromUrl) 
+    if (searchTermFromUrl || typeFromUrl || offerFromUrl || furnishedFromUrl
+      || petFromUrl || bedroomFromUrl || bathroomFromUrl || parkingFromUrl
+      || sortFromUrl || orderFromUrl) 
     setSidebarData({
       searchTerm: searchTermFromUrl || '',
       type: typeFromUrl || 'all',
@@ -54,6 +54,7 @@ export default function Search() {
 
     const fetchListings = async () => {
       try {
+        setShowMore(false);
         setLoading(true);
         const searchQuery = urlParams.toString();
         const res = await fetch(`/api/listings/search?${searchQuery}`)
@@ -64,6 +65,7 @@ export default function Search() {
         }
         setListings(data);
         setLoading(false);
+        if (data.length > 8) setShowMore(true);
       } catch (error) {
         setError(error.message)
         setLoading(false);
@@ -99,6 +101,17 @@ export default function Search() {
       const order = e.target.value.split('_')[1] === 'desc'? -1 : 1;
       setSidebarData({...sidebarData, sort, order});
     }
+  }
+
+  const handleShowMore = async () => {
+    const urlParams = new URLSearchParams(location.search);
+    const startIndex = listings.length;
+    urlParams.set('startIndex', startIndex);
+    const searchQuery = urlParams.toString();
+    const res = await fetch(`/api/listings/search?${searchQuery}`);
+    const data = await res.json();
+    if (data.length < 9) setShowMore(false);
+    setListings([...listings, ...data])
   }
 
   return (
@@ -178,6 +191,7 @@ export default function Search() {
             <ListingCard key={listing._id} listing={listing}/>)
           }
         </div>
+        {showMore && <p onClick={handleShowMore} className="text-green-900 text-sm uppercase underline hover:opacity-70 cursor-pointer p-7 text-center">Show more</p>}
       </div>
     </div>
   )
