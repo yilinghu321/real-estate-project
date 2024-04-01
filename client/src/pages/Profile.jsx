@@ -21,11 +21,6 @@ export default function Profile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  console.log(file);
-  console.log(uploadPercentage);
-  console.log(formData);
-  console.log(fileUploadError);
-  console.log(modalIsOpen)
 
   useEffect(() => {
     if (file) {
