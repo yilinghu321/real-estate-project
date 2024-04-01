@@ -67,7 +67,7 @@ export default function Home() {
           </SwiperSlide>)} 
         </Swiper>
       </div>
-      <div className='p-10 px-12 sm:px-15 md:px-20 lg:px-24 max-w-6xl mx-auto flex flex-col gap-8'>
+      <div className='p-10 px-6 sm:px-9 md:px-14 lg:px-18 max-w-6xl mx-auto flex flex-col gap-8'>
         {offerListings && offerListings.length > 0 && (
         <div>
           <div className='flex flex-col'>
